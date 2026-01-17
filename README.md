@@ -18,8 +18,8 @@ Proje kapsamında iki temel iş kuralı (Business Rule) uygulanmıştır:
 
 ## API Endpoint Listesi
 
-`GET  /api/events` Tüm etkinlikleri listeler
+`GET /api/events` Tüm etkinlikleri listeler
 `POST /api/events` Yeni bir etkinlik oluşturur
-`GET  /api/users/:userId/tickets` Belirli bir kullanıcının biletlerini getirir
+`GET /api/users/:userId/tickets` Belirli bir kullanıcının biletlerini getirir
 `POST /api/tickets` Bilet satın alma işlemi (Stok kontrolü içerir)
 `DELETE /api/tickets/:id`  Bilet iptal işlemi (Tarih kontrolü içerir)
