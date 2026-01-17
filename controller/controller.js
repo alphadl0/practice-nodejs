@@ -1,5 +1,9 @@
 const db = require('../db/mysql_connect');
 
+// Initialize in-memory storage (temporary until database is connected)
+let events = [];
+let tickets = [];
+
 const controller = {
     
     // --- GET METHODS ---
@@ -23,7 +27,6 @@ const controller = {
     // --- POST METHODS (Create) ---
     createEvent: (req, res) => {
         const newEvent = req.body;
-        // Basit bir ID atama
         newEvent.id = events.length + 1; 
         newEvent.sold = 0; 
         
@@ -35,11 +38,9 @@ const controller = {
     buyTicket: (req, res) => {
         const { eventId, userId } = req.body;
         
-        // 1. Etkinliği bul
         const event = events.find(e => e.id == eventId);
         if (!event) return res.status(404).json({ error: "Etkinlik bulunamadı" });
 
-        // 2. Kapasite kontrolü (Business Logic)
         if (event.sold >= event.capacity) {
             return res.status(400).json({ 
                 error: "Kapasite dolu! Bilet satışı yapılamaz.",
@@ -47,7 +48,6 @@ const controller = {
             });
         }
 
-        // 3. Satış işlemi
         event.sold++;
         const newTicket = { 
             id: Date.now(), 
@@ -68,13 +68,12 @@ const controller = {
         if (!ticket) return res.status(404).json({ error: "Bilet bulunamadı" });
 
         const event = events.find(e => e.id == ticket.eventId);
-        
-        // Zaman kontrolü
+        if (!event) return res.status(404).json({ error: "Etkinlik bulunamadı" });
+
         const eventDate = new Date(event.date);
         const now = new Date();
         const hoursLeft = (eventDate - now) / (1000 * 60 * 60);
 
-        // KURAL: 24 saatten az kaldıysa iptal edilemez
         if (hoursLeft < 24) {
             return res.status(400).json({ 
                 error: "Etkinliğe 24 saatten az kaldığı için iptal edilemez.",
@@ -82,9 +81,8 @@ const controller = {
             });
         }
 
-        // İptal işlemi (Array'den filtreleyerek silme)
         tickets = tickets.filter(t => t.id != ticketId);
-        event.sold--; // Stoğu geri aç
+        event.sold--;
 
         res.status(200).json({ message: "Bilet iptal edildi." });
     }
