@@ -15,6 +15,18 @@ Proje kapsamında iki temel iş kuralı (Business Rule) uygulanmıştır:
     - Bir kullanıcı biletini iptal etmek istediğinde, sistem etkinlik tarihini kontrol eder.
     - Etkinliğe **6 saatten az** bir süre kalmışsa, iptal işlemine izin verilmez.
 
+## Kurulum adımları
+Projeyi yerel ortamızda çalıştırmak için aşağıdaki adımları:
+
+### Gereksinimler
+* Node.js (v14 veya üzeri)
+* MySQL Veritabanı
+
+### Adım 1: Projeyi indirin ve paketleri yükleyin
+- `git clone (https://github.com/alphadl0/practice-nodejs)]`
+- `cd practice-nodejs`
+- `npm install`
+- `node app.js`
 
 ## API Endpoint Listesi
 
