@@ -23,3 +23,6 @@ Proje kapsamında iki temel iş kuralı (Business Rule) uygulanmıştır:
 `GET /api/users/:userId/tickets` Belirli bir kullanıcının biletlerini getirir
 `POST /api/tickets` Bilet satın alma işlemi (Stok kontrolü içerir)
 `DELETE /api/tickets/:id`  Bilet iptal işlemi (Tarih kontrolü içerir)
+
+## ER Diyagram
+<img width="1235" height="592" alt="image" src="https://github.com/user-attachments/assets/f84a0a1c-1eb4-4ebe-98ea-7f35e682e803" />
