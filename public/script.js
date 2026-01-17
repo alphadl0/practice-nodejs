@@ -1,7 +1,6 @@
 const API_BASE_URL = '/api';
 let currentEventForTicket = null;
 
-// Tab Navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const tabName = btn.getAttribute('data-tab');
@@ -10,27 +9,22 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 function switchTab(tabName) {
-    // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
 
-    // Remove active class from buttons
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
 
-    // Show selected tab
     document.getElementById(tabName).classList.add('active');
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
-    // Load data for specific tabs
     if (tabName === 'events') {
         loadAllEvents();
     }
 }
 
-// Load All Events
 async function loadAllEvents() {
     const eventsList = document.getElementById('eventsList');
     eventsList.innerHTML = '<div class="loading">Loading events...</div>';
@@ -54,7 +48,6 @@ async function loadAllEvents() {
     }
 }
 
-// Create Event Card
 function createEventCard(event) {
     const card = document.createElement('div');
     card.className = 'event-card';
@@ -95,7 +88,6 @@ function createEventCard(event) {
     return card;
 }
 
-// Open Buy Ticket Modal
 function openBuyTicketModal(eventId, eventName, price, isAvailable) {
     if (!isAvailable) return;
 
@@ -111,7 +103,6 @@ function openBuyTicketModal(eventId, eventName, price, isAvailable) {
     modal.classList.add('show');
 }
 
-// Close Modal
 document.querySelectorAll('.close').forEach(closeBtn => {
     closeBtn.addEventListener('click', function() {
         this.closest('.modal').classList.remove('show');
@@ -128,7 +119,6 @@ window.addEventListener('click', (event) => {
     if (event.target === ticketModal) ticketModal.classList.remove('show');
 });
 
-// Confirm Buy Ticket
 document.getElementById('confirmBuyBtn').addEventListener('click', async () => {
     const userId = document.getElementById('buyUserIdInput').value.trim();
 
@@ -168,7 +158,6 @@ document.getElementById('confirmBuyBtn').addEventListener('click', async () => {
     }
 });
 
-// Load User Tickets
 document.getElementById('loadTicketsBtn').addEventListener('click', async () => {
     const userId = document.getElementById('userIdInput').value.trim();
 
@@ -203,7 +192,6 @@ document.getElementById('loadTicketsBtn').addEventListener('click', async () => 
     }
 });
 
-// Create Ticket Card
 function createTicketCard(ticket) {
     const card = document.createElement('div');
     card.className = 'ticket-card';
@@ -227,7 +215,6 @@ function createTicketCard(ticket) {
     return card;
 }
 
-// Open Ticket Details Modal
 function openTicketDetailsModal(ticket) {
     const modal = document.getElementById('ticketDetailsModal');
     const ticketDetails = document.getElementById('ticketDetails');
@@ -243,7 +230,6 @@ function openTicketDetailsModal(ticket) {
     modal.classList.add('show');
 }
 
-// Cancel Ticket
 async function cancelTicket(ticketId) {
     if (!confirm('Are you sure you want to cancel this ticket? This action cannot be undone.')) {
         return;
@@ -259,7 +245,6 @@ async function cancelTicket(ticketId) {
         if (response.ok) {
             showToast('✓ Ticket cancelled successfully', 'success');
             document.getElementById('ticketDetailsModal').classList.remove('show');
-            // Reload tickets
             const userId = document.getElementById('userIdInput').value.trim();
             if (userId) {
                 document.getElementById('loadTicketsBtn').click();
@@ -273,7 +258,6 @@ async function cancelTicket(ticketId) {
     }
 }
 
-// Create Event Form
 document.getElementById('createEventForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -308,7 +292,6 @@ document.getElementById('createEventForm').addEventListener('submit', async (e) 
         if (response.ok) {
             showToast('✓ Event created successfully!', 'success');
             document.getElementById('createEventForm').reset();
-            // Switch to events tab
             switchTab('events');
         } else {
             showToast(result.message || 'Failed to create event', 'error');
@@ -319,7 +302,6 @@ document.getElementById('createEventForm').addEventListener('submit', async (e) 
     }
 });
 
-// Search Events
 document.getElementById('searchInput').addEventListener('input', (e) => {
     const searchTerm = e.target.value.toLowerCase();
     const eventCards = document.querySelectorAll('.event-card');
@@ -330,7 +312,6 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
     });
 });
 
-// Utility Functions
 function formatDate(dateString) {
     const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString('en-US', options);
@@ -357,5 +338,4 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Load events on page load
 loadAllEvents();

@@ -2,7 +2,6 @@ const db = require('../db/mysql_connect');
 
 const controller = {
     
-    // --- GET METHODS ---
     getAllEvents: async (req, res) => {
         try {
             const [events] = await db.query('SELECT * FROM events');
@@ -29,7 +28,6 @@ const controller = {
         }
     },
 
-    // --- POST METHODS (Create) ---
     createEvent: async (req, res) => {
         const { name, date, capacity, price, location, description } = req.body;
         try {
@@ -44,7 +42,6 @@ const controller = {
         }
     },
 
-    // SENARYO 1: STOK KONTROLÜ (Satın Alma)
     buyTicket: async (req, res) => {
         const { eventId, userId } = req.body;
         
@@ -81,7 +78,6 @@ const controller = {
         }
     },
 
-    // SENARYO 2: TARİH KONTROLÜ (İptal)
     cancelTicket: async (req, res) => {
         const ticketId = req.params.id;
         
