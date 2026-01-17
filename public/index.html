@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Ticketing System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sunuticket</h1>
+            <p class="subtitle">Book and manage your event tickets</p>
+        </header>
+
+        <nav class="navbar">
+            <button class="nav-btn active" data-tab="events">All Events</button>
+            <button class="nav-btn" data-tab="my-tickets">My Tickets</button>
+            <button class="nav-btn" data-tab="create-event">Create Event</button>
+        </nav>
+
+        <!-- Events Tab -->
+        <section id="events" class="tab-content active">
+            <div class="section-header">
+                <h2>Available Events</h2>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-box" 
+                    placeholder="Search events..."
+                >
+            </div>
+            <div id="eventsList" class="events-grid">
+                <div class="loading">Loading events...</div>
+            </div>
+        </section>
+
+        <!-- My Tickets Tab -->
+        <section id="my-tickets" class="tab-content">
+            <div class="section-header">
+                <h2>My Tickets</h2>
+                <div class="user-input">
+                    <input 
+                        type="text" 
+                        id="userIdInput" 
+                        class="input-field" 
+                        placeholder="Enter your User ID"
+                    >
+                    <button id="loadTicketsBtn" class="btn btn-primary">Load My Tickets</button>
+                </div>
+            </div>
+            <div id="ticketsList" class="tickets-grid">
+                <div class="empty-state">Enter your User ID and click Load to see your tickets</div>
+            </div>
+        </section>
+
+        <!-- Create Event Tab -->
+        <section id="create-event" class="tab-content">
+            <div class="section-header">
+                <h2>Create New Event</h2>
+            </div>
+            <form id="createEventForm" class="form-container">
+                <div class="form-group">
+                    <label for="eventName">Event Name *</label>
+                    <input type="text" id="eventName" required placeholder="Enter event name">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDate">Event Date *</label>
+                    <input type="datetime-local" id="eventDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventCapacity">Ticket Capacity *</label>
+                    <input type="number" id="eventCapacity" required min="1" placeholder="Number of tickets">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventPrice">Price per Ticket ($) *</label>
+                    <input type="number" id="eventPrice" required min="0" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventLocation">Location</label>
+                    <input type="text" id="eventLocation" placeholder="Event location">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDescription">Description</label>
+                    <textarea id="eventDescription" rows="4" placeholder="Event description"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">Create Event</button>
+            </form>
+        </section>
+    </div>
+
+    <!-- Modal for buying tickets -->
+    <div id="buyTicketModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Buy Ticket</h2>
+            <div id="modalEventInfo"></div>
+            <div class="form-group">
+                <label for="buyUserIdInput">Your User ID *</label>
+                <input type="text" id="buyUserIdInput" required placeholder="Enter your User ID">
+            </div>
+            <button id="confirmBuyBtn" class="btn btn-success">Confirm Purchase</button>
+        </div>
+    </div>
+
+    <!-- Modal for ticket details -->
+    <div id="ticketDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ticket Details</h2>
+            <div id="ticketDetails"></div>
+            <button id="cancelTicketBtn" class="btn btn-danger">Cancel Ticket</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

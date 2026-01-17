@@ -1,9 +1,6 @@
-// router/index.js
 const express = require('express');
 const router = express.Router();
-const defineRoutes = require('./routes'); // routes.js'i çağır
+const routes = require('./routes'); 
 
-// Router'ı fonksiyonun içine göndererek rotaları tanımlamasını sağla
-defineRoutes(router);
-
+routes(router);
 module.exports = router;

@@ -1,90 +1,119 @@
 const db = require('../db/mysql_connect');
 
-// Initialize in-memory storage (temporary until database is connected)
-let events = [];
-let tickets = [];
-
 const controller = {
     
     // --- GET METHODS ---
-    getAllEvents: (req, res) => {
-        res.status(200).json({
-            status: "success",
-            data: events
-        });
+    getAllEvents: async (req, res) => {
+        try {
+            const [events] = await db.query('SELECT * FROM events');
+            res.status(200).json({
+                status: "success",
+                data: events
+            });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     },
 
-    getUserTickets: (req, res) => {
+    getUserTickets: async (req, res) => {
         const { userId } = req.params;
-        const userTickets = tickets.filter(t => t.userId == userId);
-        res.status(200).json({
-            status: "success",
-            count: userTickets.length,
-            data: userTickets
-        });
+        try {
+            const [userTickets] = await db.query('SELECT * FROM tickets WHERE userId = ?', [userId]);
+            res.status(200).json({
+                status: "success",
+                count: userTickets.length,
+                data: userTickets
+            });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     },
 
     // --- POST METHODS (Create) ---
-    createEvent: (req, res) => {
-        const newEvent = req.body;
-        newEvent.id = events.length + 1; 
-        newEvent.sold = 0; 
-        
-        events.push(newEvent);
-        res.status(201).json({ message: "Etkinlik oluşturuldu", data: newEvent });
+    createEvent: async (req, res) => {
+        const { name, date, capacity, price, location, description } = req.body;
+        try {
+            const [result] = await db.query(
+                'INSERT INTO events (name, date, capacity, price, location, description, sold) VALUES (?, ?, ?, ?, ?, ?, 0)',
+                [name, date, capacity, price, location, description]
+            );
+            const newEvent = { id: result.insertId, ...req.body, sold: 0 };
+            res.status(201).json({ message: "Etkinlik oluşturuldu", data: newEvent });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     },
 
     // SENARYO 1: STOK KONTROLÜ (Satın Alma)
-    buyTicket: (req, res) => {
+    buyTicket: async (req, res) => {
         const { eventId, userId } = req.body;
         
-        const event = events.find(e => e.id == eventId);
-        if (!event) return res.status(404).json({ error: "Etkinlik bulunamadı" });
+        try {
+            const [events] = await db.query('SELECT * FROM events WHERE id = ?', [eventId]);
+            const event = events[0];
 
-        if (event.sold >= event.capacity) {
-            return res.status(400).json({ 
-                error: "Kapasite dolu! Bilet satışı yapılamaz.",
-                type: "BUSINESS_RULE_ERROR"
-            });
+            if (!event) return res.status(404).json({ error: "Etkinlik bulunamadı" });
+
+            if (event.sold >= event.capacity) {
+                return res.status(400).json({ 
+                    error: "Kapasite dolu! Bilet satışı yapılamaz.",
+                    type: "BUSINESS_RULE_ERROR"
+                });
+            }
+
+            const [ticketResult] = await db.query(
+                'INSERT INTO tickets (eventId, userId, purchaseDate) VALUES (?, ?, NOW())',
+                [eventId, userId]
+            );
+
+            await db.query('UPDATE events SET sold = sold + 1 WHERE id = ?', [eventId]);
+
+            const newTicket = { 
+                id: ticketResult.insertId, 
+                eventId: parseInt(eventId), 
+                userId, 
+                purchaseDate: new Date() 
+            };
+
+            res.status(201).json({ message: "Bilet başarıyla alındı", ticket: newTicket });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
-
-        event.sold++;
-        const newTicket = { 
-            id: Date.now(), 
-            eventId: parseInt(eventId), 
-            userId, 
-            purchaseDate: new Date() 
-        };
-        tickets.push(newTicket);
-
-        res.status(201).json({ message: "Bilet başarıyla alındı", ticket: newTicket });
     },
 
     // SENARYO 2: TARİH KONTROLÜ (İptal)
-    cancelTicket: (req, res) => {
+    cancelTicket: async (req, res) => {
         const ticketId = req.params.id;
-        const ticket = tickets.find(t => t.id == ticketId);
         
-        if (!ticket) return res.status(404).json({ error: "Bilet bulunamadı" });
+        try {
+            const [tickets] = await db.query('SELECT * FROM tickets WHERE id = ?', [ticketId]);
+            const ticket = tickets[0];
+            
+            if (!ticket) return res.status(404).json({ error: "Bilet bulunamadı" });
 
-        const event = events.find(e => e.id == ticket.eventId);
-        if (!event) return res.status(404).json({ error: "Etkinlik bulunamadı" });
+            const [events] = await db.query('SELECT * FROM events WHERE id = ?', [ticket.eventId]);
+            const event = events[0];
+            
+            if (!event) return res.status(404).json({ error: "Etkinlik bulunamadı" });
 
-        const eventDate = new Date(event.date);
-        const now = new Date();
-        const hoursLeft = (eventDate - now) / (1000 * 60 * 60);
+            const eventDate = new Date(event.date);
+            const now = new Date();
+            const hoursLeft = (eventDate - now) / (1000 * 60 * 60);
 
-        if (hoursLeft < 24) {
-            return res.status(400).json({ 
-                error: "Etkinliğe 24 saatten az kaldığı için iptal edilemez.",
-                type: "BUSINESS_RULE_ERROR"
-            });
+            if (hoursLeft < 6) {
+                return res.status(400).json({ 
+                    error: "Etkinliğe 6 saatten az kaldığı için iptal edilemez.",
+                    type: "BUSINESS_RULE_ERROR"
+                });
+            }
+
+            await db.query('DELETE FROM tickets WHERE id = ?', [ticketId]);
+            await db.query('UPDATE events SET sold = sold - 1 WHERE id = ?', [ticket.eventId]);
+
+            res.status(200).json({ message: "Bilet iptal edildi." });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
-
-        tickets = tickets.filter(t => t.id != ticketId);
-        event.sold--;
-
-        res.status(200).json({ message: "Bilet iptal edildi." });
     }
 };
 

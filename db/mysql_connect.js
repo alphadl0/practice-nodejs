@@ -1,10 +1,6 @@
-// db/mysql_connect.js
 const mysql = require('mysql2');
-const dotenv = require('dotenv');
+require('dotenv').config();
 
-dotenv.config();
-
-// Bağlantı havuzu (Pool) oluşturuluyor
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -14,6 +10,4 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
-
-// Async/Await kullanabilmek için promise yapısını dışa aktarıyoruz
 module.exports = pool.promise();
